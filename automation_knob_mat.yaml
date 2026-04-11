@@ -1,0 +1,111 @@
+alias: "Media Controller: Knob-Mat"
+description: Listens for custom events from the ESPHome D1 Mini to control the office_mini
+triggers:
+  - event_type: esphome.media_controller_action
+    event_data:
+      action: dial_single_click
+    id: next_track
+    trigger: event
+    alias: next track dial_single
+  - event_type: esphome.media_controller_action
+    event_data:
+      action: dial_double_click
+    id: previous_track
+    trigger: event
+    alias: prev track dial_double
+  - event_type: esphome.media_controller_action
+    event_data:
+      action: dial_long_press
+    id: mute_toggle
+    trigger: event
+    alias: mute longpress
+  - event_type: esphome.media_controller_action
+    event_data:
+      action: dedicated_single_click
+    id: button_single
+    trigger: event
+    alias: button_single dedicatedSingle
+  - event_type: esphome.media_controller_action
+    event_data:
+      action: dedicated_double_click
+    id: button_double
+    trigger: event
+    alias: button_double dedicatedDouble
+  - event_type: esphome.media_controller_action
+    event_data:
+      action: dedicated_long_press
+    id: button_long
+    trigger: event
+    alias: button_long dedicatedLong
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: next_track
+        sequence:
+          - target:
+              entity_id: media_player.office_mini
+            action: media_player.media_next_track
+      - conditions:
+          - condition: trigger
+            id: previous_track
+        sequence:
+          - target:
+              entity_id: media_player.office_mini
+            action: media_player.media_previous_track
+      - conditions:
+          - condition: trigger
+            id: mute_toggle
+        sequence:
+          - target:
+              entity_id: media_player.office_mini
+            data:
+              is_volume_muted: >-
+                {{ not state_attr('media_player.office_mini', 'is_volume_muted') }}
+            action: media_player.volume_mute
+      - conditions:
+          - condition: trigger
+            id: button_single
+        sequence:
+          - target:
+              entity_id: media_player.office_mini
+            action: media_player.media_play_pause
+      - conditions:
+          - condition: trigger
+            id: button_double
+        sequence:
+          - variables:
+              _sources: "{{ state_attr('sensor.knob_mat_sources', 'sources') }}"
+              _idx: "{{ states('input_number.knob_mat_stream_index') | int(0) }}"
+              _url: "{{ _sources[_idx] if _sources and _sources | length > _idx else '' }}"
+              _next_idx: "{{ (_idx + 1) % (_sources | length) if _sources and _sources | length > 0 else 0 }}"
+          - if:
+              - condition: template
+                value_template: "{{ _url != '' }}"
+            then:
+              - action: media_player.play_media
+                target:
+                  entity_id: media_player.office_mini
+                data:
+                  media:
+                    media_content_id: "{{ _url }}"
+                    media_content_type: music
+                    metadata: {}
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.knob_mat_stream_index
+                data:
+                  value: "{{ _next_idx }}"
+      - conditions:
+          - condition: trigger
+            id: button_long
+        sequence:
+          - action: media_player.play_media
+            target:
+              entity_id: media_player.office_mini
+            data:
+              media:
+                media_content_id: plex://playlist/your_playlist_name_here
+                media_content_type: playlist
+                metadata: {}
+mode: queued

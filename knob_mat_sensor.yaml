@@ -1,0 +1,31 @@
+# Knob Mat Sources sensor
+# Add this to configuration.yaml (or the file it !includes for command_line/sensors).
+#
+# NEW-STYLE — use this if you have a top-level "command_line:" key already,
+# or if you're on HA 2022.6+ and want to start one:
+#
+command_line:
+  - sensor:
+      name: Knob Mat Sources
+      unique_id: knob_mat_sources
+      command: >-
+        python3 -c "import json; lines=[l.strip() for l in open('/config/media_sources.txt') if l.strip()]; print(json.dumps({'sources': lines, 'count': len(lines)}))"
+      command_timeout: 10
+      scan_interval: 30
+      value_template: "{{ value_json.count }}"
+      json_attributes:
+        - sources
+
+# OLD-STYLE — use this instead if you have a "sensor:" list in configuration.yaml
+# (or a sensor.yaml included from it):
+#
+# - platform: command_line
+#   name: Knob Mat Sources
+#   unique_id: knob_mat_sources
+#   command: >-
+#     python3 -c "import json; lines=[l.strip() for l in open('/config/media_sources.txt') if l.strip()]; print(json.dumps({'sources': lines, 'count': len(lines)}))"
+#   command_timeout: 10
+#   scan_interval: 30
+#   value_template: "{{ value_json.count }}"
+#   json_attributes:
+#     - sources
