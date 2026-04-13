@@ -49,6 +49,29 @@ The sensor re-reads the file every 30 seconds — no restart needed after edits.
 
 ---
 
+## Secrets & API Keys
+
+`knob.yaml` uses ESPHome's `!secret` system — values are pulled from `secrets.yaml` in your ESPHome config directory (not committed to this repo).
+
+You need the following keys defined in that file:
+
+```yaml
+wifi_ssid: "YourNetworkName"
+wifi_password: "YourWifiPassword"
+ota_pass: "your_ota_password"
+api_encryption_key: "your_32_byte_base64_key"
+```
+
+**To generate a new `api_encryption_key`:**
+In the ESPHome dashboard, create any new device and copy the generated key, or run:
+```
+python3 -c "import secrets, base64; print(base64.b64encode(secrets.token_bytes(32)).decode())"
+```
+
+The `ota_pass` can be any string you choose — it protects over-the-air firmware updates.
+
+---
+
 ## Dependencies
 
 - **Music Assistant** running and connected to HA (entity: `media_player.office_mini_2`)
