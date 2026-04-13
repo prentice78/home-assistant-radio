@@ -18,7 +18,7 @@ triggers:
       action: dial_long_press
     id: mute_toggle
     trigger: event
-    alias: mute longpress
+    alias: dial longpress - set volume
   - event_type: esphome.media_controller_action
     event_data:
       action: dedicated_single_click
@@ -44,31 +44,30 @@ actions:
             id: next_track
         sequence:
           - target:
-              entity_id: media_player.office_mini
+              entity_id: media_player.office_mini_2
             action: media_player.media_next_track
       - conditions:
           - condition: trigger
             id: previous_track
         sequence:
           - target:
-              entity_id: media_player.office_mini
+              entity_id: media_player.office_mini_2
             action: media_player.media_previous_track
       - conditions:
           - condition: trigger
             id: mute_toggle
         sequence:
           - target:
-              entity_id: media_player.office_mini
+              entity_id: media_player.office_mini_2
             data:
-              is_volume_muted: >-
-                {{ not state_attr('media_player.office_mini', 'is_volume_muted') }}
-            action: media_player.volume_mute
+              volume_level: 0.4
+            action: media_player.volume_set
       - conditions:
           - condition: trigger
             id: button_single
         sequence:
           - target:
-              entity_id: media_player.office_mini
+              entity_id: media_player.office_mini_2
             action: media_player.media_play_pause
       - conditions:
           - condition: trigger
@@ -83,14 +82,13 @@ actions:
               - condition: template
                 value_template: "{{ _url != '' }}"
             then:
-              - action: media_player.play_media
+              - action: music_assistant.play_media
                 target:
-                  entity_id: media_player.office_mini
+                  entity_id: media_player.office_mini_2
                 data:
-                  media:
-                    media_content_id: "{{ _url }}"
-                    media_content_type: music
-                    metadata: {}
+                  media_id: "{{ _url }}"
+                  media_type: "{{ omit if _url.startswith('http') else 'playlist' }}"
+                  radio_mode: "{{ false if _url.startswith('http') else true }}"
               - action: input_number.set_value
                 target:
                   entity_id: input_number.knob_mat_stream_index
@@ -100,12 +98,7 @@ actions:
           - condition: trigger
             id: button_long
         sequence:
-          - action: media_player.play_media
-            target:
-              entity_id: media_player.office_mini
-            data:
-              media:
-                media_content_id: plex://playlist/your_playlist_name_here
-                media_content_type: playlist
-                metadata: {}
+          - target:
+              entity_id: media_player.office_mini_2
+            action: media_player.media_stop
 mode: queued
