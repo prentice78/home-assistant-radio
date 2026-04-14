@@ -75,7 +75,7 @@ The `ota_pass` can be any string you choose — it protects over-the-air firmwar
 ## Dependencies
 
 - **Music Assistant** running and connected to HA (entity: `media_player.office_mini_2`)
-- **YouTube Music provider** enabled in MA with PO token server (`ytmusic-po-token` container on port 4416)
+- **YouTube Music provider** enabled in MA with PO token server (`ytmusic-po-token` container on port 4416) — requires a **YouTube Premium subscription** (free accounts are not supported as of late 2024)
 - **`input_number.knob_mat_stream_index`** helper (see setup below)
 - **`sensor.knob_mat_sources`** command_line sensor (see setup below)
 
@@ -105,15 +105,29 @@ Settings → Helpers → Create Helper → Number:
 
 Entity ID: `input_number.knob_mat_stream_index`
 
-### 4. Import the automation
+### 4. Create the `input_number` helper
+
+Settings → Helpers → Create Helper → Number:
+
+| Field | Value |
+|---|---|
+| Name | `Knob Mat Stream Index` |
+| Min | `0` |
+| Max | `999` |
+| Step | `1` |
+| Mode | Input field |
+
+Entity ID: `input_number.knob_mat_stream_index`. No restart needed.
+
+### 5. Import the automation
 
 Settings → Automations → three-dot menu → **Edit in YAML** → paste `automation_knob_mat.yaml` → Save.
 
-### 5. Flash the D1 Mini
+### 6. Flash the D1 Mini
 
 Open ESPHome, load `knob.yaml`, and flash to the device.
 
-### 6. Restart HA
+### 7. Restart HA
 
 Required for the `command_line` sensor to load.
 
