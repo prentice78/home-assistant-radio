@@ -43,6 +43,7 @@ actions:
           - condition: trigger
             id: next_track
         sequence:
+          - action: esphome.knob_mat_blink_led
           - target:
               entity_id: media_player.office_mini_2
             action: media_player.media_next_track
@@ -50,6 +51,7 @@ actions:
           - condition: trigger
             id: previous_track
         sequence:
+          - action: esphome.knob_mat_blink_led
           - target:
               entity_id: media_player.office_mini_2
             action: media_player.media_previous_track
@@ -76,18 +78,22 @@ actions:
           - variables:
               _sources: "{{ state_attr('sensor.knob_mat_sources', 'sources') }}"
               _idx: "{{ states('input_number.knob_mat_stream_index') | int(0) }}"
-              _url: "{{ _sources[_idx] if _sources and _sources | length > _idx else '' }}"
+              _url: "{{ (_sources[_idx] if _sources and _sources | length > _idx else '').split(' #')[0].strip() }}"
               _next_idx: "{{ (_idx + 1) % (_sources | length) if _sources and _sources | length > 0 else 0 }}"
           - if:
               - condition: template
                 value_template: "{{ _url != '' }}"
             then:
+              - action: esphome.knob_mat_blink_led
               - action: music_assistant.play_media
                 target:
                   entity_id: media_player.office_mini_2
                 data:
-                  media_id: "{{ _url }}"
-                  media_type: "{{ omit if _url.startswith('http') else 'playlist' }}"
+                  media_id: >-
+                    {% if _url.startswith('playlist: ') %}{{ _url[10:] }}
+                    {% elif _url.startswith('radio: ') %}{{ _url[7:] }}
+                    {% else %}{{ _url }}{% endif %}
+                  media_type: "{{ 'music' if _url.startswith('http') else ('track' if _url.startswith('radio: ') else 'playlist') }}"
                   radio_mode: "{{ false if _url.startswith('http') else true }}"
               - action: input_number.set_value
                 target:

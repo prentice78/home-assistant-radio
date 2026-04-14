@@ -21,6 +21,10 @@ logger:
 api:
   encryption:
     key: !secret api_encryption_key
+  services:
+    - service: blink_led
+      then:
+        - script.execute: blink_led
 
 ota:
   - platform: esphome
@@ -148,6 +152,18 @@ script:
           id: knob_kitchen
           value: 0
 
+  - id: blink_led
+    mode: single
+    then:
+      - while:
+          condition:
+            lambda: 'return true;'
+          then:
+            - output.turn_on: led_output
+            - delay: 600ms
+            - output.turn_off: led_output
+            - delay: 600ms
+
 # ----------------------------------------------------
 # 1. DEFINE THE PHYSICAL PIN FOR THE LED
 # ----------------------------------------------------
@@ -174,6 +190,7 @@ text_sensor:
     entity_id: media_player.office_mini
     # Every time the speaker changes state, evaluate this rule:
     on_value:
+      - script.stop: blink_led
       - if:
           condition:
             text_sensor.state:
