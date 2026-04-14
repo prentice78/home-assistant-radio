@@ -1,4 +1,4 @@
-# Home Assistant Config — Knob-Mat Media Controller
+# Home Assistant Radio Config — Knob-Mat Media Controller
 
 ## What this is
 
